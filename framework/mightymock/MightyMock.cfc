@@ -159,7 +159,6 @@
    var tempMock = chr(0);
    var temp = '';
    
-   missingMethodName = uCase(missingMethodName);
    missingMethodArguments = createObject('java','java.util.TreeMap').init(missingMethodArguments);
    
    if( currentState == 'verifying'){
