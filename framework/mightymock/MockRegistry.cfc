@@ -44,7 +44,7 @@
     queryAddRow(this.registry,1);
     querySetCell(this.registry,'id',id);
     querySetCell(this.registry,'type', argType(args));
-    querySetCell(this.registry,'method',uCase(target));
+    querySetCell(this.registry,'method',target);
     querySetCell(this.registry,'argid',argId(args));
     querySetCell(this.registry,'returns', '');
     //{undefined} //changed 06-09-09 in order to allow simplified syntax
@@ -234,7 +234,7 @@
     <cfquery name="q" dbtype="query">
 		  select *
 		  from this.registry
-		  where type='pattern' and method = '#uCase(target)#'
+		  where type='pattern' and method = '#target#'
     </cfquery>
   <cfloop query="q">
     <cfset patternArgs = this.argMap[q.id] />

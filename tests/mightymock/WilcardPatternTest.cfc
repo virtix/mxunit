@@ -7,7 +7,6 @@ function $wilcardPatternSmokeTest(){
      mock.foo('{+}').returns(mainRetVal);
      reg = mock._$getRegistry();
      args = {1={1='asdasd'}};
-	 debug(reg.registry);
      p = reg.findByPattern('foo',args);
      debug( p );
      debug( reg );
