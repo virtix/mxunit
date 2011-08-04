@@ -227,10 +227,11 @@
     <cfargument name="target" type="string" />
     <cfargument name="args" type="struct" />
     <cfset var q = '' />
-	<cfset var lid = id(target,args) />
+	<cfset var lid = id(uCase(target),args) />
 	  <cfset var patternArgs =  {} />
     <cfset var isMatch = false />
     <cfset var behavior = {} />
+	<cfset target = uCase(target) />
     <cfquery name="q" dbtype="query">
 		  select *
 		  from this.registry
