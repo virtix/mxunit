@@ -179,46 +179,64 @@
 
 			for( row = 1; row LTE loopTotal; row=row+1 ){
 
-				array1Value = array1[row];
-				array2Value = array2[row];
-				if( isSimpleValue( array1Value ) AND isSimpleValue( array2Value ) ){
-					if( array1Value NEQ array2Value ){
-						mismatches["row #row#"] = structNew();
-
+				// If either array element is undefined compare here to prevent error
+				if(NOT ArrayIsDefined(array1,row) OR NOT ArrayIsDefined(array2,row)){
+					// If one of the elements is undefined, return match success as false. If both are undefined, return match success as true.
+					if(ArrayIsDefined(array1,row) OR ArrayIsDefined(array2,row)){
 						mismatches.success = false;
-						mismatches.message = "Data mismatch. ";
-						mismatches["row #row#"].array1Value = array1Value;
-						mismatches["row #row#"].array2Value = array2Value;
+						mismatches.message = "Cannot compare an undefined array element to a defined array element. ";
+						if(ArrayIsDefined(array1,row)){
+							array1Value = "Array Element Defined";
+							array2Value = "Array Element Not Defined";
+						}else if(ArrayIsDefined(array2,row)){
+							array1Value = "Array Element Not Defined";
+							array2Value = "Array Element Defined";
+						}
 						mismatches.Array1MismatchValues = listAppend( mismatches.Array1MismatchValues, "row #row#: #array1Value#", "#chr(10)#" );
 						mismatches.Array2MismatchValues = listAppend( mismatches.Array2MismatchValues, "row #row#: #array2Value#", "#chr(10)#" );
 					}
-				} else if ( isQuery( array1Value ) AND isQuery( array2Value ) ){
-					queryCompareResult = compareQueries( array1Value, array2Value );
-					if( NOT queryCompareResult.success ){
+				}else{
+					array1Value = array1[row];
+					array2Value = array2[row];
+					if( isSimpleValue( array1Value ) AND isSimpleValue( array2Value ) ){
+						if( array1Value NEQ array2Value ){
+							mismatches["row #row#"] = structNew();
+	
+							mismatches.success = false;
+							mismatches.message = "Data mismatch. ";
+							mismatches["row #row#"].array1Value = array1Value;
+							mismatches["row #row#"].array2Value = array2Value;
+							mismatches.Array1MismatchValues = listAppend( mismatches.Array1MismatchValues, "row #row#: #array1Value#", "#chr(10)#" );
+							mismatches.Array2MismatchValues = listAppend( mismatches.Array2MismatchValues, "row #row#: #array2Value#", "#chr(10)#" );
+						}
+					} else if ( isQuery( array1Value ) AND isQuery( array2Value ) ){
+						queryCompareResult = compareQueries( array1Value, array2Value );
+						if( NOT queryCompareResult.success ){
+							mismatches.success = false;
+							mismatches["row #row#"] = queryCompareResult;
+							mismatches.Array1MismatchValues = listAppend( mismatches.Array1MismatchValues, "Row #row#, Query Compare Result: #queryCompareResult.Query1MismatchValues#", "#chr(10)#" );
+							mismatches.Array2MismatchValues = listAppend( mismatches.Array2MismatchValues, "Row #row#, Query Compare Result: #queryCompareResult.Query2MismatchValues#", "#chr(10)#" );
+						}
+					} else if ( isStruct( array1Value ) AND isStruct( array2Value ) ){
+						structCompareResult = compareStructs( array1Value, array2Value );
+						if( NOT structCompareResult.success ){
+							mismatches.success = false;
+							mismatches["row #row#"] = structCompareResult;
+							mismatches.Array1MismatchValues = listAppend( mismatches.Array1MismatchValues, "Row #row#, Struct Compare Result: #structCompareResult.Struct1MismatchValues#", "#chr(10)#" );
+							mismatches.Array2MismatchValues = listAppend( mismatches.Array2MismatchValues, "Row #row#, Struct Compare Result: #structCompareResult.Struct2MismatchValues#", "#chr(10)#" );
+						}
+					} else if ( isArray(array1Value) AND isArray(array2Value) ){
+						arrayCompareResult = compareArrays( array1Value, array2Value );
+						if( NOT arrayCompareResult.success ){
+							mismatches.success = false;
+							mismatches["row #row#"] = arrayCompareResult;
+							mismatches.Array1MismatchValues = listAppend( mismatches.Array1MismatchValues, "Row #row#, Array Compare Result: #arrayCompareResult.Array1MismatchValues#", "#chr(10)#" );
+							mismatches.Array2MismatchValues = listAppend( mismatches.Array2MismatchValues, "Row #row#, Array Compare Result: #arrayCompareResult.Array2MismatchValues#", "#chr(10)#" );
+						}
+					} else {
+						mismatches.message = "Not sure how to compare these datatypes at row #row#. File a bug with a patch. ";
 						mismatches.success = false;
-						mismatches["row #row#"] = queryCompareResult;
-						mismatches.Array1MismatchValues = listAppend( mismatches.Array1MismatchValues, "Row #row#, Query Compare Result: #queryCompareResult.Query1MismatchValues#", "#chr(10)#" );
-						mismatches.Array2MismatchValues = listAppend( mismatches.Array2MismatchValues, "Row #row#, Query Compare Result: #queryCompareResult.Query2MismatchValues#", "#chr(10)#" );
 					}
-				} else if ( isStruct( array1Value ) AND isStruct( array2Value ) ){
-					structCompareResult = compareStructs( array1Value, array2Value );
-					if( NOT structCompareResult.success ){
-						mismatches.success = false;
-						mismatches["row #row#"] = structCompareResult;
-						mismatches.Array1MismatchValues = listAppend( mismatches.Array1MismatchValues, "Row #row#, Struct Compare Result: #structCompareResult.Struct1MismatchValues#", "#chr(10)#" );
-						mismatches.Array2MismatchValues = listAppend( mismatches.Array2MismatchValues, "Row #row#, Struct Compare Result: #structCompareResult.Struct2MismatchValues#", "#chr(10)#" );
-					}
-				} else if ( isArray(array1Value) AND isArray(array2Value) ){
-					arrayCompareResult = compareArrays( array1Value, array2Value );
-					if( NOT arrayCompareResult.success ){
-						mismatches.success = false;
-						mismatches["row #row#"] = arrayCompareResult;
-						mismatches.Array1MismatchValues = listAppend( mismatches.Array1MismatchValues, "Row #row#, Array Compare Result: #arrayCompareResult.Array1MismatchValues#", "#chr(10)#" );
-						mismatches.Array2MismatchValues = listAppend( mismatches.Array2MismatchValues, "Row #row#, Array Compare Result: #arrayCompareResult.Array2MismatchValues#", "#chr(10)#" );
-					}
-				} else {
-					mismatches.message = "Not sure how to compare these datatypes at row #row#. File a bug with a patch. ";
-					mismatches.success = false;
 				}
 
 			}
